@@ -1,0 +1,1 @@
+My take on the Arduino ping pong ball clock: https://www.instructables.com/Ping-Pong-Ball-LED-Clock/
