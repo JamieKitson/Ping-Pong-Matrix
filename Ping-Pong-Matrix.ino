@@ -3,7 +3,8 @@
 #include <Adafruit_NeoPixel.h>
 #include "font.h"
 
-const int WIDTH = 14;
+const int PAD = 4;
+const int WIDTH = 12 + PAD;
 
 Adafruit_NeoMatrix matrix = Adafruit_NeoMatrix(WIDTH, 7, 15,
 //  NEO_MATRIX_TOP     + NEO_MATRIX_RIGHT +
@@ -23,7 +24,7 @@ int pass = 0; // Counter
 int i = 0; // Counter
 int clr = 0; // Counter for Indexing Array of Colors
 
-char msg[] = "rstuvwxyz"; // BLANK Message of Your Choice;
+char msg[] = "1rstuvwxyz"; // BLANK Message of Your Choice;
 int msgSize = ((sizeof(msg) / sizeof(char)) * (pixelPerChar + 1)); // + (2 * pixelPerChar); // CACULATE message length;
 
 uint16_t myRemapFnTopRight(uint16_t x, uint16_t y) {
@@ -32,7 +33,7 @@ uint16_t myRemapFnTopRight(uint16_t x, uint16_t y) {
 }
 
 uint16_t myRemapFnBottomLeft(uint16_t x, uint16_t y) {
-  x = x + ((7 - y) / 2);
+  x = x - PAD + ((7 - y) / 2);
   return (7 * x) + ((6 - y) % 7);  
 }
 
