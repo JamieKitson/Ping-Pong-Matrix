@@ -8,6 +8,10 @@ const int PAD = 4;
 const int WIDTH = 12 + PAD;
 const int HEIGHT = 7;
 const int NUMMATRIX = WIDTH * HEIGHT;
+const int HUE_JUMP = 20;
+
+// If the top/bottom edge balls on the same LED column are to the left of the next ball then 1, else 0
+const int BALL_DIR = 0;
 
 CHSV colour( 0, 255, 180);
 CRGB leds[NUMMATRIX];
@@ -21,7 +25,8 @@ FastLED_NeoMatrix *matrix = new FastLED_NeoMatrix(leds,
 
 #define arr_len( x )  ( sizeof( x ) / sizeof( *x ) ) // Calculation of Array Size;
 
-int pixelPerChar = 3;
+const int pixelPerChar = 3;
+int counter = 120;
 
 char msg[] = "This is a longer message.";
 int msgSize = arr_len(msg) * (pixelPerChar + 1);
@@ -31,8 +36,9 @@ uint16_t myRemapFnTopRight(uint16_t x, uint16_t y) {
   // return (7 * (WIDTH - 1 - x)) + (y % 7);  
 }
 
-uint16_t myRemapFnBottomLeft(uint16_t x, uint16_t y) {
-  x = x - PAD + ((HEIGHT - y) / 2);
+uint16_t myRemapFnBottomLeft(uint16_t x, uint16_t y) 
+{
+  x = x - PAD + ((HEIGHT - BALL_DIR - y) / 2);
   return (HEIGHT * x) + (HEIGHT - 1 - y);
 }
 
@@ -45,42 +51,24 @@ void setup() {
   matrix->setRemapFunction(myRemapFnBottomLeft);
   matrix->setBrightness(100);
   matrix->setTextColor(CRGB::White);
-  matrix->print(msg); // Set the Message String;
-  /*
-  matrix->print("eo"); // Set the Message String;
-  matrix->show();
-  delay(1000);
-// */
 }
 
-int counter = 120;
-#define LED_BLACK    0
-/*
 void RainbowAltPixels(int column, int offset)
 {
-    for(int j = offset; j < 7; j += 2){
-      int p = (column * 7) + j;
-      if ((p >= 0) && (p < NUMMATRIX))
+    for(int row = offset; row < HEIGHT; row += 2)
+    {
+      int p = (column * HEIGHT) + row;
       leds[p]= colour;
     }
     colour.hue = (colour.hue + HUE_JUMP / 2) % 256;
 }
-*/
-void loop() {
 
-  const int HUE_JUMP = 20;
+void loop() {
   
   for ( int column = 0; column < WIDTH; column++)
   {
-    for (int offset = 1; offset >= 0; offset--)
-    {
-      for(int row = offset; row < HEIGHT; row += 2)
-      {
-        int p = (column * HEIGHT) + row;
-        leds[p]= colour;
-      }
-      colour.hue = (colour.hue + HUE_JUMP / 2) % 256;
-    }
+    RainbowAltPixels(column, BALL_DIR == 0 ? 1 : 0);
+    RainbowAltPixels(column, BALL_DIR);
   }
   
   colour.hue = (colour.hue - (WIDTH * HUE_JUMP) + 1) % 256;
