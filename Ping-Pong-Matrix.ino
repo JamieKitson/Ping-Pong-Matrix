@@ -2,12 +2,16 @@
 #include <FastLED_NeoMatrix.h>
 #include <FastLED.h>
 #include "font.h"
+#include <Fonts/Picopixel.h>
 
 // Padding to allow italic letters into "virtual" space
 const int PAD = 4;
+
 const int WIDTH = 12 + PAD;
 const int HEIGHT = 7;
 const int NUMMATRIX = WIDTH * HEIGHT;
+
+// Difference in hue between neighbouring balls
 const int HUE_JUMP = 20;
 
 // If the top/bottom edge balls on the same LED column are to the left of the next ball then 1, else 0
@@ -67,8 +71,8 @@ void loop() {
   
   for ( int column = 0; column < WIDTH; column++)
   {
-    RainbowAltPixels(column, BALL_DIR == 0 ? 1 : 0);
-    RainbowAltPixels(column, BALL_DIR);
+    for ( int offset = 0; offset < 2; offset++ )
+      RainbowAltPixels(column, BALL_DIR == offset ? 1 : 0);
   }
   
   colour.hue = (colour.hue - (WIDTH * HUE_JUMP) + 1) % 256;
