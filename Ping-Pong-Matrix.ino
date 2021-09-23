@@ -31,7 +31,7 @@ FastLED_NeoMatrix *matrix = new FastLED_NeoMatrix(leds,
 #define arr_len( x )  ( sizeof( x ) / sizeof( *x ) ) // Calculation of Array Size;
 
 const int pixelPerChar = 4;
-int counter = 140;
+int counter = WIDTH * 10;
 
 uint16_t myRemapFnTopRight(uint16_t x, uint16_t y) {
   // x = x + ((5 - y) / 2);
@@ -86,7 +86,7 @@ void loop() {
 
   int x = message.length() * pixelPerChar * -10;
   if (counter < x)
-    counter = 140;
+    counter = WIDTH * 10;
 
   delay(50);
 
