@@ -23,6 +23,9 @@ const int NUMMATRIX = WIDTH * HEIGHT;
 // If the top/bottom edge balls on the same LED column are to the left of the next ball then 1, else 0
 const int BALL_DIR = 0;
 
+// Number of rainbow colour changes for each text pixel move
+const int COLOUR_STEPS_TO_TEXT = 5;
+
 String message = "This is a longer message.";
 
 CHSV colour( 0, 255, 180);
@@ -42,7 +45,9 @@ AsyncWebServer server(80);
 #define arr_len( x )  ( sizeof( x ) / sizeof( *x ) ) // Calculation of Array Size;
 
 const int pixelPerChar = 4;
-int counter = WIDTH * 10;
+int cursor = WIDTH * 10;
+int scrollCount = 0;
+bool connected = false;
 
 uint16_t myRemapFnTopRight(uint16_t x, uint16_t y) {
   // x = x + ((5 - y) / 2);
@@ -70,7 +75,7 @@ void setup()
      if (request->params() > 0)
      {
        AsyncWebParameter* p = request->getParam(0); 
-       message = p->value();
+       SetMessage(p->value());
      }
      request->send(200, "text/html", "<form method=get><input type=text name=message><input type=submit></form>");
   });
@@ -81,7 +86,7 @@ void SetRainbow()
 {
   // Difference in hue between neighbouring balls
   const int HUE_JUMP = 10;
-  // Speed of rainbow scroll. Negative numbers go counter to text.
+  // Speed of rainbow scroll. Negative numbers go cursor to text.
   const int HUE_SPEED = 1;
   for ( int column = 0; column < WIDTH; column++)
   {
@@ -99,33 +104,52 @@ void SetRainbow()
   colour.hue = (colour.hue - (WIDTH * HUE_JUMP) + HUE_SPEED) % 256;
 }
 
-bool isConnected = false;
+void ScrollMessage()
+{
+  matrix->setCursor(cursor-- / COLOUR_STEPS_TO_TEXT, 6);
+  matrix->print(message);
+
+  int x = - message.length() * pixelPerChar * COLOUR_STEPS_TO_TEXT;
+  if (cursor < x)
+  {
+    cursor = WIDTH * COLOUR_STEPS_TO_TEXT;
+    scrollCount--;
+  }
+}
+
+void SetMessage(String msg)
+{
+  message = msg;
+  cursor = WIDTH * COLOUR_STEPS_TO_TEXT;
+  scrollCount = 2;
+}
 
 void loop() 
 {
-
-  const int COLOUR_STEPS_TO_TEXT = 10;
 
   SetRainbow();
 
   if (WiFi.status() != WL_CONNECTED)
   {
-    isConnected = false;
-    message = "WiFi: " + String(WiFi.status());
+    connected = false;
+    SetMessage("WiFi: " + String(WiFi.status()));
   }
-  else if (!isConnected)
+  else if (!connected)
   {
-    isConnected = true;
-    message = "Connected";
+    connected = true;
+    SetMessage("Connected");
+    timeClient.update();
   }
 
-  matrix->setCursor(counter-- / COLOUR_STEPS_TO_TEXT, 6);
-  matrix->print(message);
-  matrix->show();
+  if (scrollCount > 0)
+    ScrollMessage();
+  else
+  {
+    matrix->setCursor(0, 6);
+    matrix->print(timeClient.getFormattedTime());
+  }
 
-  int x = - message.length() * pixelPerChar * COLOUR_STEPS_TO_TEXT;
-  if (counter < x)
-    counter = WIDTH * COLOUR_STEPS_TO_TEXT;
+  matrix->show();
 
   delay(50);
 
