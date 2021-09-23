@@ -48,6 +48,7 @@ const int pixelPerChar = 4;
 int cursor = WIDTH * 10;
 int scrollCount = 0;
 bool connected = false;
+unsigned long triedConnect;
 
 uint16_t myRemapFnTopRight(uint16_t x, uint16_t y) {
   // x = x + ((5 - y) / 2);
@@ -63,6 +64,7 @@ uint16_t myRemapFnBottomLeft(uint16_t x, uint16_t y)
 void setup() 
 {
   WiFi.begin(ssid, password);
+  triedConnect = millis();
   FastLED.addLeds<NEOPIXEL, PIN>(  leds, NUMMATRIX  ).setCorrection(TypicalLEDStrip);
   matrix->begin();
   matrix->setFont(&TomThumb);
@@ -74,10 +76,10 @@ void setup()
   { 
      if (request->params() > 0)
      {
-       AsyncWebParameter* p = request->getParam(0); 
-       SetMessage(p->value());
+       AsyncWebParameter* p = request->getParam(0);
+       SetMessage(p->value()); // .c_str());
      }
-     request->send(200, "text/html", "<form method=get><input type=text name=message><input type=submit></form>");
+     request->send(200, "text/html", "<meta name=viewport content=\"initial-scale=1.0\" /><form method=get><input type=text name=message><input type=submit></form>");
   });
   server.begin();
 }
@@ -132,7 +134,13 @@ void loop()
   if (WiFi.status() != WL_CONNECTED)
   {
     connected = false;
-    SetMessage("WiFi: " + String(WiFi.status()));
+    message = "WiFi: " + String(WiFi.status());
+    scrollCount = 1;
+    if ((millis() - triedConnect) / 1000 > 10)
+    {
+      WiFi.begin(ssid, password);
+      triedConnect = millis();
+    }
   }
   else if (!connected)
   {
