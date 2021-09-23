@@ -16,6 +16,8 @@ const int NUMMATRIX = WIDTH * HEIGHT;
 // If the top/bottom edge balls on the same LED column are to the left of the next ball then 1, else 0
 const int BALL_DIR = 0;
 
+String message = "This is a longer message.";
+
 CHSV colour( 0, 255, 180);
 CRGB leds[NUMMATRIX];
 
@@ -28,11 +30,8 @@ FastLED_NeoMatrix *matrix = new FastLED_NeoMatrix(leds,
 
 #define arr_len( x )  ( sizeof( x ) / sizeof( *x ) ) // Calculation of Array Size;
 
-const int pixelPerChar = 3;
-int counter = 120;
-
-char msg[] = "This is a longer message.";
-int msgSize = arr_len(msg) * (pixelPerChar + 1);
+const int pixelPerChar = 4;
+int counter = 140;
 
 uint16_t myRemapFnTopRight(uint16_t x, uint16_t y) {
   // x = x + ((5 - y) / 2);
@@ -80,12 +79,15 @@ void SetRainbow()
 void loop() {
 
   SetRainbow();
-  
+
   matrix->setCursor(counter-- / 10, 6); // Set Starting Point for Text String;
-  matrix->print(msg); // Set the Message String;
+  matrix->print(message); // Set the Message String;
   matrix->show();
-  if (counter / 10 < -msgSize)
-    counter = 120;
+
+  int x = message.length() * pixelPerChar * -10;
+  if (counter < x)
+    counter = 140;
+
   delay(50);
 
 }
