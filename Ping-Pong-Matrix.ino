@@ -4,15 +4,17 @@
 #include "font.h"
 #include <Fonts/Picopixel.h>
 
+const int PIN = 15;
+
+// Difference in hue between neighbouring balls
+const int HUE_JUMP = 10;
+
 // Padding to allow italic letters into "virtual" space
 const int PAD = 4;
 
 const int WIDTH = 12 + PAD;
 const int HEIGHT = 7;
 const int NUMMATRIX = WIDTH * HEIGHT;
-
-// Difference in hue between neighbouring balls
-const int HUE_JUMP = 20;
 
 // If the top/bottom edge balls on the same LED column are to the left of the next ball then 1, else 0
 const int BALL_DIR = 0;
@@ -47,10 +49,9 @@ uint16_t myRemapFnBottomLeft(uint16_t x, uint16_t y)
 }
 
 void setup() {
-  FastLED.addLeds<NEOPIXEL,15>(  leds, NUMMATRIX  ).setCorrection(TypicalLEDStrip);
+  FastLED.addLeds<NEOPIXEL, PIN>(  leds, NUMMATRIX  ).setCorrection(TypicalLEDStrip);
   matrix->begin();
   matrix->setFont(&TomThumb);
-  //matrix->setTextSize(3);
   matrix->setTextWrap(false);
   matrix->setRemapFunction(myRemapFnBottomLeft);
   matrix->setBrightness(100);
@@ -71,8 +72,16 @@ void loop() {
   
   for ( int column = 0; column < WIDTH; column++)
   {
-    for ( int offset = 0; offset < 2; offset++ )
-      RainbowAltPixels(column, BALL_DIR == offset ? 1 : 0);
+    for ( int flip = 0; flip < 2; flip++ )
+    {
+      int offset = BALL_DIR == flip ? 1 : 0;
+      for(int row = offset; row < HEIGHT; row += 2)
+      {
+        int p = (column * HEIGHT) + row;
+        leds[p]= colour;
+      }
+      colour.hue = (colour.hue + HUE_JUMP / 2) % 256;
+    }
   }
   
   colour.hue = (colour.hue - (WIDTH * HUE_JUMP) + 1) % 256;
