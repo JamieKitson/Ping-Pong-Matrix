@@ -76,17 +76,20 @@ void SetRainbow()
   colour.hue = (colour.hue - (WIDTH * HUE_JUMP) + HUE_SPEED) % 256;
 }
 
-void loop() {
+void loop() 
+{
+
+  const int COLOUR_STEPS_TO_TEXT = 10;
 
   SetRainbow();
 
-  matrix->setCursor(counter-- / 10, 6); // Set Starting Point for Text String;
-  matrix->print(message); // Set the Message String;
+  matrix->setCursor(counter-- / COLOUR_STEPS_TO_TEXT, 6);
+  matrix->print(message);
   matrix->show();
 
-  int x = message.length() * pixelPerChar * -10;
+  int x = - message.length() * pixelPerChar * COLOUR_STEPS_TO_TEXT;
   if (counter < x)
-    counter = WIDTH * 10;
+    counter = WIDTH * COLOUR_STEPS_TO_TEXT;
 
   delay(50);
 
