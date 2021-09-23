@@ -54,13 +54,7 @@ uint16_t myRemapFnBottomLeft(uint16_t x, uint16_t y)
   x = x - PAD + ((HEIGHT - BALL_DIR - y) / 2);
   return (HEIGHT * x) + (HEIGHT - 1 - y);
 }
-/*
-void handleGenericArgs() 
-{ //Handler
-message = “Number of args received:”;
-message += server.args();  
-}
-*/
+
 void setup() 
 {
   WiFi.begin(ssid, password);
@@ -71,8 +65,6 @@ void setup()
   matrix->setRemapFunction(myRemapFnBottomLeft);
   matrix->setBrightness(100);
   matrix->setTextColor(CRGB::White);
-  //server.on("/", handleGenericArgs);
-  //*
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
   { 
      if (request->params() > 0)
@@ -80,9 +72,8 @@ void setup()
        AsyncWebParameter* p = request->getParam(0); 
        message = p->value();
      }
-     request->send(200, "text/html", "<form method=get><input type=text name=message><submit></form>");
+     request->send(200, "text/html", "<form method=get><input type=text name=message><input type=submit></form>");
   });
-  // */
   server.begin();
 }
 
@@ -126,44 +117,6 @@ void loop()
   {
     isConnected = true;
     message = "Connected";
-  }
-  else
-  {
-    /*
-      WiFiClient client = server.available();   // Listen for incoming clients
-
-  if (client) {                             // If a new client connects,
-    message = "";
-    while (client.connected()) {  // loop while the client's connected
-      if (client.available()) {             // if there's bytes to read from the client,
-        char c = client.read();             // read a byte, then
-        if (c == '\n')
-        {
-          client.println(F("HTTP/1.1 200 OK"));
-          client.println();
-          client.stop();
-        }
-        else
-          message = message + c;
-      }
-    }
-    client.stop();
-  }
-    /*
-    WiFiClient client = server.available();
-    if (client) {
-
-    if (client.connected()) {
-      Serial.println("Connected to client");
-    }
-
-    // close the connection:
-    client.stop();
-  }
-  /*
-    timeClient.update();
-    message = timeClient.getFormattedTime();
-    */
   }
 
   matrix->setCursor(counter-- / COLOUR_STEPS_TO_TEXT, 6);
