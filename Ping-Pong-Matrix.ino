@@ -6,9 +6,6 @@
 
 const int PIN = 15;
 
-// Difference in hue between neighbouring balls
-const int HUE_JUMP = 10;
-
 // Padding to allow italic letters into "virtual" space
 const int PAD = 4;
 
@@ -58,18 +55,12 @@ void setup() {
   matrix->setTextColor(CRGB::White);
 }
 
-void RainbowAltPixels(int column, int offset)
+void SetRainbow()
 {
-    for(int row = offset; row < HEIGHT; row += 2)
-    {
-      int p = (column * HEIGHT) + row;
-      leds[p]= colour;
-    }
-    colour.hue = (colour.hue + HUE_JUMP / 2) % 256;
-}
-
-void loop() {
-  
+  // Difference in hue between neighbouring balls
+  const int HUE_JUMP = 10;
+  // Speed of rainbow scroll. Negative numbers go counter to text.
+  const int HUE_SPEED = 1;
   for ( int column = 0; column < WIDTH; column++)
   {
     for ( int flip = 0; flip < 2; flip++ )
@@ -83,8 +74,12 @@ void loop() {
       colour.hue = (colour.hue + HUE_JUMP / 2) % 256;
     }
   }
-  
-  colour.hue = (colour.hue - (WIDTH * HUE_JUMP) + 1) % 256;
+  colour.hue = (colour.hue - (WIDTH * HUE_JUMP) + HUE_SPEED) % 256;
+}
+
+void loop() {
+
+  SetRainbow();
   
   matrix->setCursor(counter-- / 10, 6); // Set Starting Point for Text String;
   matrix->print(msg); // Set the Message String;
@@ -92,5 +87,5 @@ void loop() {
   if (counter / 10 < -msgSize)
     counter = 120;
   delay(50);
-  //colour.hue = (colour.hue+1)%256;
+
 }
