@@ -4,9 +4,9 @@
 #include "font.h"
 // #include <Fonts/Picopixel.h>
 #include <WiFi.h> 
-#include <NTPClient.h>
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
+#include <ezTime.h>
 
 const char* ssid = "BT-9ZAKH5";           
 const char* password = "k3nRrqEgPmYRAR";
@@ -38,10 +38,9 @@ FastLED_NeoMatrix *matrix = new FastLED_NeoMatrix(leds,
   NEO_MATRIX_COLUMNS + NEO_MATRIX_PROGRESSIVE
   );
 
-WiFiUDP ntpUDP;
-NTPClient timeClient(ntpUDP);
+Timezone timeZone;
 AsyncWebServer server(80);
-
+  
 #define arr_len( x )  ( sizeof( x ) / sizeof( *x ) ) // Calculation of Array Size;
 
 const int pixelPerChar = 4;
@@ -82,6 +81,7 @@ void setup()
      request->send(200, "text/html", "<meta name=viewport content=\"initial-scale=1.0\" /><form method=get><input type=text name=message><input type=submit></form>");
   });
   server.begin();
+//  timeClient.setUpdateInterval(NTP_UPDATE_INTERVAL_MS);
 }
 
 void SetRainbow()
@@ -145,8 +145,8 @@ void loop()
   else if (!connected)
   {
     connected = true;
-    SetMessage("Connected");
-    timeClient.update();
+    timeZone.setLocation("Europe/London");
+    updateNTP();
   }
 
   if (scrollCount > 0)
@@ -154,7 +154,7 @@ void loop()
   else
   {
     matrix->setCursor(0, 6);
-    matrix->print(timeClient.getFormattedTime());
+    matrix->print(timeZone.dateTime("H:i:s"));
   }
 
   matrix->show();
