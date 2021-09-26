@@ -41,8 +41,6 @@ FastLED_NeoMatrix *matrix = new FastLED_NeoMatrix(leds,
 Timezone timeZone;
 AsyncWebServer server(80);
   
-#define arr_len( x )  ( sizeof( x ) / sizeof( *x ) ) // Calculation of Array Size;
-
 const int pixelPerChar = 4;
 int cursor = WIDTH * 10;
 int scrollCount = 0;
@@ -79,10 +77,11 @@ void setup()
        AsyncWebParameter* p = request->getParam(0);
        SetMessage(p->value());
      }
-     request->send(200, "text/html", "<meta name=viewport content=\"initial-scale=1.0\" /><form method=get><input type=text name=message><input type=submit></form>");
+     request->send(200, F("text/html"), F("<meta name=viewport content=\"initial-scale=1.0\" /><form method=get><input type=text name=message><input type=submit></form>"));
   });
   server.begin();
 //  timeClient.setUpdateInterval(NTP_UPDATE_INTERVAL_MS);
+    timeZone.setLocation(F("Europe/London"));
 }
 
 void SetRainbow()
@@ -148,8 +147,8 @@ void loop()
   {
     // message = "Connected";
     connected = true;
-    timeZone.setLocation(F("Europe/London"));
     updateNTP();
+    scrollCount = 0;
   }
 
   const int STEPS = 30;
