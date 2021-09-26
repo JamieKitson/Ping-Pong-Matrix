@@ -52,7 +52,7 @@ int lightReading = 2000;
 
 uint16_t myRemapFnTopRight(uint16_t x, uint16_t y) {
   // x = x + ((5 - y) / 2);
-  // return (7 * (WIDTH - 1 - x)) + (y % 7);  
+  return (7 * (WIDTH - 1 - x)) + (y % 7);  
 }
 
 uint16_t myRemapFnBottomLeft(uint16_t x, uint16_t y) 
@@ -77,7 +77,7 @@ void setup()
      if (request->params() > 0)
      {
        AsyncWebParameter* p = request->getParam(0);
-       SetMessage(p->value()); // .c_str());
+       SetMessage(p->value());
      }
      request->send(200, "text/html", "<meta name=viewport content=\"initial-scale=1.0\" /><form method=get><input type=text name=message><input type=submit></form>");
   });
@@ -146,9 +146,9 @@ void loop()
   }
   else if (!connected)
   {
-    message = "Connected";
+    // message = "Connected";
     connected = true;
-    timeZone.setLocation("Europe/London");
+    timeZone.setLocation(F("Europe/London"));
     updateNTP();
   }
 
@@ -166,7 +166,7 @@ void loop()
   else
   {
     matrix->setCursor(0, 6);
-    matrix->print(timeZone.dateTime("H:i:s"));
+    matrix->print(timeZone.dateTime(F("H:i:s")));
   }
 
   matrix->show();
