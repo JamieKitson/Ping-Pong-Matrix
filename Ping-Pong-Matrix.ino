@@ -160,9 +160,6 @@ void loop()
   // Don't jump immediately to new brightness, do it in steps
   lightReading = lightReading + lightDiff / STEPS;
   matrix->setBrightness(map(lightReading, 0, 4096, 50, 255));
-  //message = lightReading;
-
-  scrollCount = 1;
 
   if (scrollCount > 0)
     ScrollMessage();
