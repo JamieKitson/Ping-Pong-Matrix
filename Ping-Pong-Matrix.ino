@@ -26,7 +26,7 @@ const int BALL_DIR = 0;
 // Number of rainbow colour changes for each text pixel move
 const int COLOUR_STEPS_TO_TEXT = 5;
 
-String message = "This is a longer message.";
+String message;
 
 CHSV colour( 0, 255, 180);
 CRGB leds[NUMMATRIX];
@@ -48,6 +48,7 @@ int cursor = WIDTH * 10;
 int scrollCount = 0;
 bool connected = false;
 unsigned long triedConnect;
+int lightReading = 2000;
 
 uint16_t myRemapFnTopRight(uint16_t x, uint16_t y) {
   // x = x + ((5 - y) / 2);
@@ -119,7 +120,7 @@ void ScrollMessage()
   }
 }
 
-void SetMessage(String msg)
+void SetMessage(const String& msg)
 {
   message = msg;
   cursor = WIDTH * COLOUR_STEPS_TO_TEXT;
@@ -134,7 +135,8 @@ void loop()
   if (WiFi.status() != WL_CONNECTED)
   {
     connected = false;
-    message = "WiFi: " + String(WiFi.status());
+    message = "WiFi: ";
+    message =+ WiFi.status();
     scrollCount = 1;
     if ((millis() - triedConnect) / 1000 > 10)
     {
@@ -144,10 +146,23 @@ void loop()
   }
   else if (!connected)
   {
+    message = "Connected";
     connected = true;
     timeZone.setLocation("Europe/London");
     updateNTP();
   }
+
+  const int STEPS = 30;
+  int lightDiff = analogRead(34) - lightReading;
+  if ((lightDiff != 0) && (abs(lightDiff) < STEPS))
+    lightDiff = (lightDiff/ abs(lightDiff)) * STEPS;
+    
+  // Don't jump immediately to new brightness, do it in steps
+  lightReading = lightReading + lightDiff / STEPS;
+  matrix->setBrightness(map(lightReading, 0, 4096, 50, 255));
+  //message = lightReading;
+
+  scrollCount = 1;
 
   if (scrollCount > 0)
     ScrollMessage();
