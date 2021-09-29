@@ -80,8 +80,6 @@ void setup()
      request->send(200, F("text/html"), F("<meta name=viewport content=\"initial-scale=1.0\" /><form method=get><input type=text name=message><input type=submit></form>"));
   });
   server.begin();
-//  timeClient.setUpdateInterval(NTP_UPDATE_INTERVAL_MS);
-    timeZone.setLocation(F("Europe/London"));
 }
 
 void SetRainbow()
@@ -147,18 +145,23 @@ void loop()
   {
     // message = "Connected";
     connected = true;
+    timeZone.setLocation(F("Europe/London"));
     updateNTP();
     scrollCount = 0;
   }
 
   const int STEPS = 30;
   int lightDiff = analogRead(34) - lightReading;
-  if ((lightDiff != 0) && (abs(lightDiff) < STEPS))
-    lightDiff = (lightDiff/ abs(lightDiff)) * STEPS;
+  int absLightDiff = abs(lightDiff);
+  if ((lightDiff != 0) && (absLightDiff < STEPS))
+    lightDiff = (lightDiff / absLightDiff) * STEPS;
     
   // Don't jump immediately to new brightness, do it in steps
   lightReading = lightReading + lightDiff / STEPS;
   matrix->setBrightness(map(lightReading, 0, 4096, 50, 255));
+
+//  message = lightReading;
+//  scrollCount = 1;
 
   if (scrollCount > 0)
     ScrollMessage();
