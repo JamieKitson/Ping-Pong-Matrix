@@ -16,7 +16,7 @@ const int PIN = 15;
 // Padding to allow italic letters into "virtual" space
 const int PAD = 4;
 
-const int WIDTH = 12 + PAD;
+const int WIDTH = 17 + PAD;
 const int HEIGHT = 7;
 const int NUMMATRIX = WIDTH * HEIGHT;
 
@@ -48,6 +48,57 @@ bool connected = false;
 unsigned long triedConnect;
 int lightReading = 2000;
 
+const int Digits[10][10] =
+{
+  {7,8,10,11,14,18,22,24},
+  {14,16,18,15,17},
+//  {14,16,18,22,24},
+  {7,8,9,11,14,16,18,24},
+  {7,9,11,14,16,18,22,24},
+  {9,10,11,16,18,22,24},
+  {7,9,10,11,14,16,18,22},
+  {7,8,9,14,15,16,18,22},
+  {7,11,14,16,17,24},
+  {7,8,9,10,11,14,16,18,22,24},
+  {7,9,10,11,14,16,17,24},
+};
+
+int invertAlternateColumns(int pos)
+{
+      if (((pos / 7) % 2) == 1)
+      {
+        pos = pos - (pos % 7) + (6 - pos % 7);
+      }
+      if (((pos % 7) % 2) == 1)
+      {
+        pos += 7;
+      }
+      return pos;
+}
+
+void displaynumber( int place , int number){
+  for (int i = 0 ; i < 10 ; i++) {
+    int first = number/10; 
+    if (Digits[first][i] != 0) {
+      int pos = Digits[first][i] + place;
+      pos = invertAlternateColumns(pos);
+      /*
+      if (((pos / 7) % 2) == 1)
+      {
+        pos = pos - (pos % 7) + (6 - pos % 7);
+      }
+      */
+      leds[pos] = CRGB(255,255,255);;
+    }
+    int sec = number%10;
+    if (Digits[sec][i] != 0) {
+      int pos = Digits[sec][i]+28+place;
+      pos = invertAlternateColumns(pos);
+      leds[pos] = CRGB(255,255,255);;
+    }
+  }
+}
+
 uint16_t myRemapFnTopRight(uint16_t x, uint16_t y) {
   // x = x + ((5 - y) / 2);
   return (7 * (WIDTH - 1 - x)) + (y % 7);  
@@ -65,9 +116,9 @@ void setup()
   triedConnect = millis();
   FastLED.addLeds<NEOPIXEL, PIN>(  leds, NUMMATRIX  ).setCorrection(TypicalLEDStrip);
   matrix->begin();
-  matrix->setFont(&TomThumb);
+//  matrix->setFont(&TomThumb);
   matrix->setTextWrap(false);
-  matrix->setRemapFunction(myRemapFnBottomLeft);
+//  matrix->setRemapFunction(myRemapFnBottomLeft);
   matrix->setBrightness(100);
   matrix->setTextColor(CRGB::White);
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
@@ -119,6 +170,9 @@ void ScrollMessage()
 
 void SetMessage(const String& msg)
 {
+  matrix->setFont(&TomThumb);
+  matrix->setRemapFunction(myRemapFnBottomLeft);
+  
   message = msg;
   cursor = WIDTH * COLOUR_STEPS_TO_TEXT;
   scrollCount = 2;
@@ -167,8 +221,18 @@ void loop()
     ScrollMessage();
   else
   {
-    matrix->setCursor(0, 6);
-    matrix->print(timeZone.dateTime(F("H:i:s")));
+      displaynumber(-6,timeZone.minute());
+  displaynumber(64,timeZone.second());
+      if ( timeZone.second() % 2 == 0 ){
+    leds[58] = CRGB(255,255,255);
+    leds[60] = CRGB(255,255,255);
+  }
+    /*
+  matrix->setFont(&TomThumb);
+  matrix->setRemapFunction();
+    matrix->setCursor(3, 6);
+    matrix->print(timeZone.dateTime(F("H:i")));
+    */
   }
 
   matrix->show();
